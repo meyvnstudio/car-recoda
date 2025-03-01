@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Submission Form | by Iwm</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+        .car-section { border: 1px solid #ddd; padding: 10px; margin-top: 20px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Car Submission Form</h2>
+        
+        <label>Phone Number:</label>
+        <input type="text" id="phone" required>
+        
+        <label>Email:</label>
+        <input type="email" id="email" required>
+        
+        <label>Location:</label>
+        <input type="text" id="location" placeholder="Use Google Maps if possible">
+        
+        <div id="cars"></div>
+        
+        <button onclick="addCar()">+ Add Car</button>
+        <button onclick="submitForm()">Submit</button>
+    </div>
+
+    <script>
+        let carCount = 0;
+
+        function addCar() {
+            carCount++;
+            const carSection = document.createElement("div");
+            carSection.className = "car-section";
+            carSection.innerHTML = `
+                <h3>Car ${carCount}</h3>
+                <label>Brand:</label>
+                <input type="text" class="brand" required>
+                
+                <label>Model:</label>
+                <input type="text" class="model" required>
+                
+                <label>Year:</label>
+                <input type="number" class="year" required>
+                
+                <label>Description:</label>
+                <input type="text" class="description" required>
+                
+                <label>Price:</label>
+                <input type="number" class="price" required>
+                
+                <label>Offer Price:</label>
+                <input type="number" class="offerPrice">
+                
+                <label>Mileage:</label>
+                <input type="number" class="mileage" required>
+                
+                <label>Condition:</label>
+                <select class="condition">
+                    <option value="Used">Used</option>
+                    <option value="New">New</option>
+                </select>
+                
+                <label>Category:</label>
+                <input type="text" class="category" required>
+                
+                <label>Transmission:</label>
+                <input type="text" class="transmission" required>
+                
+                <label>Fuel Type:</label>
+                <input type="text" class="fuelType" required>
+                
+                <label>Date:</label>
+                <input type="date" class="date" required>
+                
+                <label>Images (Upload or provide URL):</label>
+                <input type="file" class="image-upload" multiple>
+                <input type="text" class="image-url" placeholder="Enter Image URL (if available)">
+            `;
+            document.getElementById("cars").appendChild(carSection);
+        }
+
+        function submitForm() {
+            const phone = document.getElementById("phone").value;
+            const email = document.getElementById("email").value;
+            const location = document.getElementById("location").value;
+            const carSections = document.querySelectorAll(".car-section");
+            let cars = [];
+            
+            carSections.forEach(section => {
+                const images = [];
+                const fileInput = section.querySelector(".image-upload");
+                const urlInput = section.querySelector(".image-url").value;
+                
+                if (urlInput) images.push(urlInput);
+                
+                if (fileInput.files.length > 0) {
+                    for (let file of fileInput.files) {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = function() {
+                            images.push(reader.result);
+                        };
+                    }
+                }
+
+                cars.push({
+                    brand: section.querySelector(".brand").value || "NA",
+                    model: section.querySelector(".model").value || "NA",
+                    year: section.querySelector(".year").value || "NA",
+                    description: section.querySelector(".description").value || "NA",
+                    price: section.querySelector(".price").value || "NA",
+                    offerPrice: section.querySelector(".offerPrice").value || "NA",
+                    mileage: section.querySelector(".mileage").value || "NA",
+                    condition: section.querySelector(".condition").value,
+                    category: section.querySelector(".category").value || "NA",
+                    transmission: section.querySelector(".transmission").value || "NA",
+                    fuelType: section.querySelector(".fuelType").value || "NA",
+                    date: section.querySelector(".date").value || "NA",
+                    images: images
+                });
+            });
+
+            const data = { phone, email, location, cars };
+            const jsonData = JSON.stringify(data, null, 2);
+            
+            const blob = new Blob([jsonData], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = "car_submission.json";
+            downloadLink.click();
+            
+            const whatsappUrl = `https://wa.me/250786969572?text=${encodeURIComponent(jsonData)}`;
+            setTimeout(() => {
+                if (confirm("Send via WhatsApp?")) {
+                    window.open(whatsappUrl, "_blank");
+                } else if (confirm("Send via Email?")) {
+                    window.location.href = `mailto:kampusagency@gmail.com?subject=Car Submission&body=${encodeURIComponent(jsonData)}`;
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
